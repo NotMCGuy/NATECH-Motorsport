@@ -1,0 +1,23 @@
+[project]
+name = "natech-dash-os"
+version = "0.1.0"
+description = "NATECH embedded dashboard runtime foundation"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "PySide6>=6.7.0",
+  "python-can>=4.4.0",
+  "cantools>=39.4.0",
+  "pydantic>=2.8.0",
+  "PyYAML>=6.0.2"
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

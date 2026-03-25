@@ -1,0 +1,7 @@
+stale_timeout_ms: 300
+poll_interval_ms: 40
+thresholds:
+  rpm_redline: 11800
+  fuel_low_pct: 18
+  engine_temp_high_c: 110
+  battery_low_v: 12.0

@@ -1,0 +1,61 @@
+Metadata-Version: 2.4
+Name: natech-dash-os
+Version: 0.1.0
+Summary: NATECH embedded dashboard runtime foundation
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: PySide6>=6.7.0
+Requires-Dist: python-can>=4.4.0
+Requires-Dist: cantools>=39.4.0
+Requires-Dist: pydantic>=2.8.0
+Requires-Dist: PyYAML>=6.0.2
+
+# NATECH Dash OS (Embedded Runtime Foundation)
+
+This is the non-web application foundation for a vehicle dashboard runtime.
+
+## Scope in this stage
+- Native runtime process (`natech_dash_os.runtime`) for telemetry ingest.
+- Sensor gateway abstraction for `SIM` and `CAN` sources.
+- Deterministic warning engine for priority statuses.
+- Native UI entrypoint (PySide6) for HMI integration.
+
+## Not yet production complete
+- No watchdog daemon yet.
+- No secure OTA/update pipeline yet.
+- No redundant failover channel yet.
+- CAN decoding map is scaffolded, not final DBC mapping.
+
+## Run (development)
+1. `cd dash_os`
+2. `python -m pip install -e .`
+3. Sim mode UI: `python -m natech_dash_os.main --simulate`
+4. Headless runtime: `python -m natech_dash_os.main --simulate --headless`
+
+## UI test checklist
+1. Start with simulation: `python -m natech_dash_os.main --simulate`
+2. App opens in fullscreen standby (`IGNITION OFF`).
+3. Ignition ON event (simulated automatically after startup) plays `dash_os/assets/boot.mp4`.
+4. After boot video completes, cluster view appears and live values update.
+5. Press `I` to manually toggle ignition for repeated testing:
+   - OFF -> standby
+   - ON -> boot video -> cluster
+
+## Custom boot video
+- Default file: `dash_os/assets/boot.mp4`
+- Override via CLI:
+  - `python -m natech_dash_os.main --simulate --boot-video C:/path/to/boot.mp4`
+
+## Folder structure
+- `dash_os/src/natech_dash_os/core` -> signal model, warning logic, shared state store
+- `dash_os/src/natech_dash_os/io` -> simulated/CAN sensor gateways
+- `dash_os/src/natech_dash_os/runtime` -> runtime loop and config loader
+- `dash_os/src/natech_dash_os/ui` -> native PySide6 cluster application
+- `dash_os/config/runtime.yaml` -> runtime thresholds and polling settings
+- `dash_os/assets/boot.mp4` -> ignition boot video
+
+## Production direction
+This runtime is designed to map directly to the target architecture in `ideas.md`:
+- CM4/Linux runs this UI/runtime process.
+- STM32 handles safety-critical channel and watchdog.
+- CAN gateway adapter forwards validated signals into `SignalStore`.
