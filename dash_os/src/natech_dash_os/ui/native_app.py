@@ -16,7 +16,10 @@ class ClusterWindow(QWidget):
     def __init__(self, store: SignalStore, stop_event: threading.Event, boot_video_path: Path) -> None:
         super().__init__()
         self._sim_throttle = 0.0
-        self._sim_gear = 1
+        self._sim_brake = 0.0
+        self._sim_gear = 0  # Start in neutral
+        self._sim_clutch = 0.0  # 0=engaged, 1=disengaged
+        self._sim_boost = 0.0  # 0=off, 1=on
         self.store = store
         self.stop_event = stop_event
         self.boot_video_path = boot_video_path
@@ -35,6 +38,9 @@ class ClusterWindow(QWidget):
             "QLabel#standby {font-size: 34px; font-weight: 700; color: #9fbde9;}"
             "QLabel#hint {font-size: 18px; color: #7895be;}"
         )
+        # Ensure keyboard focus for simulation controls
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocus()
 
         self.stack = QStackedLayout(self)
 
@@ -146,35 +152,79 @@ class ClusterWindow(QWidget):
                 self.manual_ignition_override = not self.manual_ignition_override
             event.accept()
             return
-        # Throttle up/down (Up/Down)
+        # Throttle (Up)
         if key == Qt.Key.Key_Up:
-            self._sim_throttle = min(1.0, self._sim_throttle + 0.05)
+            self._sim_throttle = 1.0
             self._update_sim_inputs()
             event.accept()
             return
+        # Boost (Spacebar)
+        if key == Qt.Key.Key_Space:
+            self._sim_boost = 1.0
+            self._update_sim_inputs()
+            event.accept()
+            return
+        # Brake (Down)
         if key == Qt.Key.Key_Down:
-            self._sim_throttle = max(0.0, self._sim_throttle - 0.05)
+            self._sim_brake = 1.0
             self._update_sim_inputs()
             event.accept()
             return
-        # Gear up/down (A/Z)
+        # Clutch (Left Shift)
+        if key == Qt.Key.Key_Shift:
+            self._sim_clutch = 1.0
+            self._update_sim_inputs()
+            event.accept()
+            return
+        # Gear up (A)
         if key == Qt.Key.Key_A:
             self._sim_gear = min(6, self._sim_gear + 1)
             self._update_sim_inputs()
             event.accept()
             return
+        # Gear down (Z)
         if key == Qt.Key.Key_Z:
-            self._sim_gear = max(1, self._sim_gear - 1)
+            self._sim_gear = max(0, self._sim_gear - 1)
             self._update_sim_inputs()
             event.accept()
             return
         super().keyPressEvent(event)
+    def keyReleaseEvent(self, event) -> None:
+        key = event.key()
+        # Release throttle when Up is released
+        if key == Qt.Key.Key_Up:
+            self._sim_throttle = 0.0
+            self._update_sim_inputs()
+            event.accept()
+            return
+        # Release boost when Spacebar is released
+        if key == Qt.Key.Key_Space:
+            self._sim_boost = 0.0
+            self._update_sim_inputs()
+            event.accept()
+            return
+        # Release brake when Down is released
+        if key == Qt.Key.Key_Down:
+            self._sim_brake = 0.0
+            self._update_sim_inputs()
+            event.accept()
+            return
+        # Release clutch when Left Shift is released
+        if key == Qt.Key.Key_Shift:
+            self._sim_clutch = 0.0
+            self._update_sim_inputs()
+            event.accept()
+            return
+        super().keyReleaseEvent(event)
 
     def _update_sim_inputs(self):
         # Only works if using SimulatedSensorGateway
         gw = getattr(self.store, 'gateway', None)
         if gw and hasattr(gw, 'set_sim_inputs'):
-            gw.set_sim_inputs(self._sim_throttle, self._sim_gear)
+            brake = getattr(self, '_sim_brake', 0.0)
+            clutch = getattr(self, '_sim_clutch', 0.0)
+            boost = getattr(self, '_sim_boost', 0.0)
+            gw.set_sim_inputs(self._sim_throttle, self._sim_gear, brake, clutch, boost)
 
     def closeEvent(self, event) -> None:  # type: ignore[override]
         self.stop_event.set()

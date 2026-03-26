@@ -36,8 +36,10 @@ This is the non-web application foundation for a vehicle dashboard runtime.
 1. Start with simulation: `python -m natech_dash_os.main --simulate`
 2. App opens in fullscreen standby (`IGNITION OFF`).
 3. Ignition ON event (simulated automatically after startup) plays `dash_os/assets/boot.mp4`.
-4. After boot video completes, cluster view appears and live values update.
-5. Press `I` to manually toggle ignition for repeated testing:
+4. Boot video audio is enabled (system output device required).
+5. Boot video must complete naturally to end-of-media before cluster appears.
+6. After boot video completes, cluster view appears and live values update.
+7. Press `I` to manually toggle ignition for repeated testing:
    - OFF -> standby
    - ON -> boot video -> cluster
 
@@ -53,6 +55,7 @@ This is the non-web application foundation for a vehicle dashboard runtime.
 - `dash_os/src/natech_dash_os/ui` -> native PySide6 cluster application
 - `dash_os/config/runtime.yaml` -> runtime thresholds and polling settings
 - `dash_os/assets/boot.mp4` -> ignition boot video
+- `dash_os/docs/UI_WINDOWS_PLAN.md` -> planned scope and acceptance criteria per UI window
 
 ## Production direction
 This runtime is designed to map directly to the target architecture in `ideas.md`:

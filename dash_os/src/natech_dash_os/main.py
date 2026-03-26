@@ -36,7 +36,7 @@ def main() -> None:
 
     config = load_runtime_config(Path(args.config))
     gateway = SimulatedSensorGateway() if args.simulate else CanSensorGateway(channel=args.can_channel)
-    store = SignalStore()
+    store = SignalStore(gateway=gateway)
 
     warning_engine = WarningEngine(
         stale_timeout_ms=config.stale_timeout_ms,
