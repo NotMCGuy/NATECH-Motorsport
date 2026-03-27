@@ -23,6 +23,11 @@ class TelemetryFrame:
     trip_km: float = 0.0
     odometer_km: float = 0.0
     gear: str = "N"
+    throttle_pct: float = 0.0
+    brake_pct: float = 0.0
+    clutch_pct: float = 0.0
+    boost_bar: float = 0.0
+    accel_g: float = 0.0
     source: str = "SIM"
     captured_at: float = field(default_factory=time.monotonic)
 
